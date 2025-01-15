@@ -1,8 +1,27 @@
-import { createRoot } from 'react-dom/client'
-import 'tailwindcss/tailwind.css'
-import App from 'components/App'
+import { createRouter } from '@tanstack/react-router'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import { routeTree } from './routeTree.gen'
+import './styles/tailwind.css'
 
-const container = document.getElementById('root') as HTMLDivElement
-const root = createRoot(container)
+const router = createRouter({ routeTree })
 
-root.render(<App />)
+declare module '@tanstack/react-router' {
+  interface Register {
+    // This infers the type of our router and registers it across your entire project
+    router: typeof router
+  }
+}
+
+const rootElement = document.querySelector('#root') as Element
+if (!rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement)
+  root.render(
+    <React.StrictMode>
+      <React.Suspense fallback="loading">
+        <App router={router} />
+      </React.Suspense>
+    </React.StrictMode>
+  )
+}
