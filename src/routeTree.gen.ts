@@ -13,120 +13,232 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as JournalIdImport } from './routes/journal.$id'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedJournalsIndexImport } from './routes/_authenticated/journals/index'
+import { Route as AuthenticatedDashboardIndexImport } from './routes/_authenticated/dashboard/index'
+import { Route as AuthenticatedJournalsCreateImport } from './routes/_authenticated/journals/create'
+import { Route as AuthenticatedJournalsIdImport } from './routes/_authenticated/journals/$id'
 
 // Create Virtual Routes
 
-const JournalsLazyImport = createFileRoute('/journals')()
-const AboutLazyImport = createFileRoute('/about')()
-const IndexLazyImport = createFileRoute('/')()
+const SignupLazyImport = createFileRoute('/signup')()
+const LoginLazyImport = createFileRoute('/login')()
 
 // Create/Update Routes
 
-const JournalsLazyRoute = JournalsLazyImport.update({
-  id: '/journals',
-  path: '/journals',
+const SignupLazyRoute = SignupLazyImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/journals.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/signup.lazy').then((d) => d.Route))
 
-const AboutLazyRoute = AboutLazyImport.update({
-  id: '/about',
-  path: '/about',
+const LoginLazyRoute = LoginLazyImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
 
-const IndexLazyRoute = IndexLazyImport.update({
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
-const JournalIdRoute = JournalIdImport.update({
-  id: '/journal/$id',
-  path: '/journal/$id',
-  getParentRoute: () => rootRoute,
+const AuthenticatedJournalsIndexRoute = AuthenticatedJournalsIndexImport.update(
+  {
+    id: '/journals/',
+    path: '/journals/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any,
+)
+
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedJournalsCreateRoute =
+  AuthenticatedJournalsCreateImport.update({
+    id: '/journals/create',
+    path: '/journals/create',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedJournalsIdRoute = AuthenticatedJournalsIdImport.update({
+  id: '/journals/$id',
+  path: '/journals/$id',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexLazyImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedIndexImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutLazyImport
-      parentRoute: typeof rootRoute
+    '/_authenticated/journals/$id': {
+      id: '/_authenticated/journals/$id'
+      path: '/journals/$id'
+      fullPath: '/journals/$id'
+      preLoaderRoute: typeof AuthenticatedJournalsIdImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/journals': {
-      id: '/journals'
+    '/_authenticated/journals/create': {
+      id: '/_authenticated/journals/create'
+      path: '/journals/create'
+      fullPath: '/journals/create'
+      preLoaderRoute: typeof AuthenticatedJournalsCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/journals/': {
+      id: '/_authenticated/journals/'
       path: '/journals'
       fullPath: '/journals'
-      preLoaderRoute: typeof JournalsLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/journal/$id': {
-      id: '/journal/$id'
-      path: '/journal/$id'
-      fullPath: '/journal/$id'
-      preLoaderRoute: typeof JournalIdImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedJournalsIndexImport
+      parentRoute: typeof AuthenticatedImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedJournalsIdRoute: typeof AuthenticatedJournalsIdRoute
+  AuthenticatedJournalsCreateRoute: typeof AuthenticatedJournalsCreateRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedJournalsIndexRoute: typeof AuthenticatedJournalsIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedJournalsIdRoute: AuthenticatedJournalsIdRoute,
+  AuthenticatedJournalsCreateRoute: AuthenticatedJournalsCreateRoute,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedJournalsIndexRoute: AuthenticatedJournalsIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexLazyRoute
-  '/about': typeof AboutLazyRoute
-  '/journals': typeof JournalsLazyRoute
-  '/journal/$id': typeof JournalIdRoute
+  '': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginLazyRoute
+  '/signup': typeof SignupLazyRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/journals/$id': typeof AuthenticatedJournalsIdRoute
+  '/journals/create': typeof AuthenticatedJournalsCreateRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/journals': typeof AuthenticatedJournalsIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexLazyRoute
-  '/about': typeof AboutLazyRoute
-  '/journals': typeof JournalsLazyRoute
-  '/journal/$id': typeof JournalIdRoute
+  '/login': typeof LoginLazyRoute
+  '/signup': typeof SignupLazyRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/journals/$id': typeof AuthenticatedJournalsIdRoute
+  '/journals/create': typeof AuthenticatedJournalsCreateRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/journals': typeof AuthenticatedJournalsIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexLazyRoute
-  '/about': typeof AboutLazyRoute
-  '/journals': typeof JournalsLazyRoute
-  '/journal/$id': typeof JournalIdRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginLazyRoute
+  '/signup': typeof SignupLazyRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/journals/$id': typeof AuthenticatedJournalsIdRoute
+  '/_authenticated/journals/create': typeof AuthenticatedJournalsCreateRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/journals/': typeof AuthenticatedJournalsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/journals' | '/journal/$id'
+  fullPaths:
+    | ''
+    | '/login'
+    | '/signup'
+    | '/'
+    | '/journals/$id'
+    | '/journals/create'
+    | '/dashboard'
+    | '/journals'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/journals' | '/journal/$id'
-  id: '__root__' | '/' | '/about' | '/journals' | '/journal/$id'
+  to:
+    | '/login'
+    | '/signup'
+    | '/'
+    | '/journals/$id'
+    | '/journals/create'
+    | '/dashboard'
+    | '/journals'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/login'
+    | '/signup'
+    | '/_authenticated/'
+    | '/_authenticated/journals/$id'
+    | '/_authenticated/journals/create'
+    | '/_authenticated/dashboard/'
+    | '/_authenticated/journals/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexLazyRoute: typeof IndexLazyRoute
-  AboutLazyRoute: typeof AboutLazyRoute
-  JournalsLazyRoute: typeof JournalsLazyRoute
-  JournalIdRoute: typeof JournalIdRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginLazyRoute: typeof LoginLazyRoute
+  SignupLazyRoute: typeof SignupLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexLazyRoute: IndexLazyRoute,
-  AboutLazyRoute: AboutLazyRoute,
-  JournalsLazyRoute: JournalsLazyRoute,
-  JournalIdRoute: JournalIdRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginLazyRoute: LoginLazyRoute,
+  SignupLazyRoute: SignupLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -137,25 +249,48 @@ export const routeTree = rootRoute
 {
   "routes": {
     "__root__": {
-      "filePath": "__root.ts",
+      "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/about",
-        "/journals",
-        "/journal/$id"
+        "/_authenticated",
+        "/login",
+        "/signup"
       ]
     },
-    "/": {
-      "filePath": "index.lazy.tsx"
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
+      "children": [
+        "/_authenticated/",
+        "/_authenticated/journals/$id",
+        "/_authenticated/journals/create",
+        "/_authenticated/dashboard/",
+        "/_authenticated/journals/"
+      ]
     },
-    "/about": {
-      "filePath": "about.lazy.tsx"
+    "/login": {
+      "filePath": "login.lazy.tsx"
     },
-    "/journals": {
-      "filePath": "journals.lazy.tsx"
+    "/signup": {
+      "filePath": "signup.lazy.tsx"
     },
-    "/journal/$id": {
-      "filePath": "journal.$id.tsx"
+    "/_authenticated/": {
+      "filePath": "_authenticated/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/journals/$id": {
+      "filePath": "_authenticated/journals/$id.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/journals/create": {
+      "filePath": "_authenticated/journals/create.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/dashboard/": {
+      "filePath": "_authenticated/dashboard/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/journals/": {
+      "filePath": "_authenticated/journals/index.tsx",
+      "parent": "/_authenticated"
     }
   }
 }

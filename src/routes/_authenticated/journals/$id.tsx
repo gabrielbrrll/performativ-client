@@ -1,10 +1,6 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/journal/$id')({
-  loader: async ({ params }) => {
-    console.log(params.id)
-    return 'sample'
-  },
+export const Route = createFileRoute('/_authenticated/journals/$id')({
   component: RouteComponent
 })
 

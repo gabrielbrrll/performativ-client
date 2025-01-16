@@ -5,7 +5,10 @@ import App from './App'
 import { routeTree } from './routeTree.gen'
 import './styles/tailwind.css'
 
-const router = createRouter({ routeTree })
+const router = createRouter({
+  routeTree,
+  context: { authentication: undefined! }
+})
 
 declare module '@tanstack/react-router' {
   interface Register {
