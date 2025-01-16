@@ -1,5 +1,5 @@
 // src/pages/LoginPage/LoginPage.tsx (or wherever your LoginPage is)
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, redirect } from '@tanstack/react-router'
 import React, { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 
@@ -8,7 +8,6 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const { setAuthToken, setUser } = useAuth() // <-- destructure setUser too!
-  const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +33,7 @@ const LoginPage: React.FC = () => {
       setUser(data.user)
       localStorage.setItem('authToken', data.token)
 
-      navigate({ to: '/' })
+      redirect({ to: '/dashboard' })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'Something went wrong')

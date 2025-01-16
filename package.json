@@ -26,13 +26,17 @@
     "@tanstack/react-query": "^5.64.1",
     "@tanstack/react-router": "^1.97.0",
     "@tanstack/router-plugin": "^1.97.0",
+    "quill": "^2.0.3",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "react-quill": "^2.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",
     "@types/node": "^20.17.11",
+    "@types/quill": "^2.0.14",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",

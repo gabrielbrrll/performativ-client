@@ -6,7 +6,7 @@ import { fetchRecentJournals } from '../../api/journals' // import the function
 import { useAuth } from '../../context/AuthContext'
 
 const LandingPage: React.FC = () => {
-  const { authToken, setAuthToken, user, setUser } = useAuth()
+  const { authToken, user } = useAuth()
   const navigate = useNavigate()
 
   const [journalTitle, setJournalTitle] = useState('')
@@ -21,13 +21,6 @@ const LandingPage: React.FC = () => {
     queryFn: () => fetchRecentJournals(authToken)
   })
 
-  const handleLogout = () => {
-    setAuthToken('')
-    setUser(null)
-    localStorage.removeItem('authToken')
-    navigate({ to: '/login' })
-  }
-
   const handleStartJournaling = () => {
     if (journalTitle.trim()) {
       navigate({
@@ -41,19 +34,6 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
-      <header className="flex items-center justify-between bg-white p-4 shadow-md">
-        <h1 className="text-2xl font-bold">Syrupy</h1>
-        <div className="flex items-center">
-          <span className="mr-4">Hi, {user ? user.name : 'Guest'}!</span>
-          <button
-            className="rounded px-4 py-2 text-red-500 hover:bg-gray-200"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
       <main className="p-8">
         <h2 className="mb-4 text-3xl">
           Hi, {user ? user.name : 'Guest'}! How are you doing?
