@@ -3,28 +3,21 @@ import Quill from 'quill'
 import 'quill/dist/quill.bubble.css'
 
 interface EditorProps {
-  theme?: string
-  placeholder?: string
   value?: string
-  onBlur?: (content: string) => void
+  placeholder?: string
+  onChange?: (content: string) => void
 }
 
-const Editor: React.FC<EditorProps> = React.memo(
-  ({
-    theme = 'bubble',
-    placeholder = 'Start writing here...',
-    value,
-    onBlur
-  }) => {
-    const editorRef = useRef<HTMLDivElement | null>(null)
-    const quillInstance = useRef<Quill | null>(null)
+const Editor: React.FC<EditorProps> = ({ value, placeholder, onChange }) => {
+  const editorRef = useRef<HTMLDivElement | null>(null)
+  const quillInstance = useRef<Quill | null>(null)
 
-    useEffect(() => {
-      if (!editorRef.current || quillInstance.current) return
+  useEffect(() => {
+    if (!editorRef.current) return
 
-      // Initialize Quill instance
+    if (!quillInstance.current) {
       quillInstance.current = new Quill(editorRef.current, {
-        theme,
+        theme: 'bubble',
         placeholder,
         modules: {
           toolbar: [
@@ -35,41 +28,25 @@ const Editor: React.FC<EditorProps> = React.memo(
         }
       })
 
-      // Trigger onBlur when editor loses focus
-      quillInstance.current.on('selection-change', (range) => {
-        if (range === null) {
-          const content = quillInstance.current?.root.innerHTML || ''
-          onBlur?.(content)
-        }
+      quillInstance.current.on('text-change', () => {
+        const content = quillInstance.current?.root.innerHTML || ''
+        onChange?.(content)
       })
+    }
 
-      return () => {
-        quillInstance.current = null // Cleanup instance on unmount
+    if (value !== undefined && quillInstance.current) {
+      if (quillInstance.current.root.innerHTML !== value) {
+        quillInstance.current.root.innerHTML = value
       }
-    }, [theme, placeholder, onBlur])
+    }
+  }, [placeholder, value, onChange])
 
-    // Synchronize content when value changes
-    useEffect(() => {
-      if (quillInstance.current && value !== undefined) {
-        if (quillInstance.current.root.innerHTML !== value) {
-          quillInstance.current.root.innerHTML = value
-        }
-      }
-    }, [value])
-
-    return (
-      <div
-        ref={editorRef}
-        style={{
-          height: '300px',
-          border: '1px solid #ccc',
-          borderRadius: '4px'
-        }}
-      />
-    )
-  }
-)
-
-Editor.displayName = 'Editor'
+  return (
+    <div
+      ref={editorRef}
+      style={{ height: '300px', border: '1px solid #ccc', borderRadius: '4px' }}
+    />
+  )
+}
 
 export default Editor

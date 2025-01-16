@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import Editor from 'components/Editor/Editor'
+import { Route } from 'routes/_authenticated/journals/create'
 
 interface JournalEntryForm {
   title: string
@@ -9,30 +10,43 @@ interface JournalEntryForm {
 }
 
 const JournalEntryPage: React.FC = () => {
-  const { control, handleSubmit, register, reset } = useForm<JournalEntryForm>({
-    defaultValues: {
-      title: '',
-      content: '',
-      status: 'draft'
-    }
-  })
+  const { title = '' } = Route.useSearch()
+
+  const { control, handleSubmit, register, setValue } =
+    useForm<JournalEntryForm>({
+      defaultValues: {
+        title: title,
+        content: '',
+        status: 'draft'
+      }
+    })
 
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
+  const [status, setStatus] = useState<'draft' | 'published'>('draft')
+  const [journalId, setJournalId] = useState<number | null>(null)
 
-  const onSubmit = async (data: JournalEntryForm) => {
+  const handleSave = async (data: JournalEntryForm, publish = false) => {
     setError(null)
     setSuccess(false)
 
+    const apiPath = journalId
+      ? `http://127.0.0.1:8000/api/v1/journals/${journalId}`
+      : 'http://127.0.0.1:8000/api/v1/journals'
+    const method = journalId ? 'PUT' : 'POST'
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/journals', {
-        method: 'POST',
+      const response = await fetch(apiPath, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}` // Include Bearer token
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          ...data,
+          status: publish ? 'published' : 'draft'
+        })
       })
 
       if (!response.ok) {
@@ -40,8 +54,12 @@ const JournalEntryPage: React.FC = () => {
         throw new Error(errorData.message || 'Failed to save journal entry')
       }
 
-      setSuccess(true) // Show success feedback
-      reset() // Clear the form
+      const responseData = await response.json()
+
+      setSuccess(true)
+      setStatus(publish ? 'published' : 'draft')
+      setJournalId(responseData.journal.id)
+      setValue('status', publish ? 'published' : 'draft')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     }
@@ -51,8 +69,18 @@ const JournalEntryPage: React.FC = () => {
     <div className="p-8">
       <h1 className="mb-4 text-2xl font-bold">Create a New Journal Entry</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Title Field */}
+      <div className="mb-4">
+        <span
+          className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+            status === 'published'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          {status === 'published' ? 'Published' : 'Draft'}
+        </span>
+      </div>
+      <form onSubmit={handleSubmit((data) => handleSave(data, true))}>
         <div className="mb-4">
           <label
             htmlFor="title"
@@ -69,7 +97,6 @@ const JournalEntryPage: React.FC = () => {
           />
         </div>
 
-        {/* Editor Field */}
         <div className="mb-4">
           <Controller
             name="content"
@@ -78,28 +105,25 @@ const JournalEntryPage: React.FC = () => {
               <Editor
                 value={field.value} // Bind the editor content to form value
                 placeholder="Write your journal entry here..."
-                onBlur={(content) => field.onChange(content)} // Update form state on blur
+                onChange={(content) => field.onChange(content)} // Update form state on every keystroke
               />
             )}
           />
         </div>
 
-        {/* Error Feedback */}
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        {/* Success Feedback */}
         {success && (
           <p className="text-sm text-green-500">
-            Journal entry saved successfully!
+            Journal entry {journalId ? 'updated' : 'published'} successfully!
           </p>
         )}
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="mt-4 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Save Entry
+          {journalId ? 'Update' : 'Save'} & Publish
         </button>
       </form>
     </div>

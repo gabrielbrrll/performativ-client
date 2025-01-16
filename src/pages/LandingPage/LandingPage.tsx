@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { fetchRecentJournals } from '../../api/journals' // import the function
+import { fetchRecentJournals } from '../../api/journals'
 import { useAuth } from '../../context/AuthContext'
 
 const LandingPage: React.FC = () => {
   const { authToken, user } = useAuth()
-  const navigate = useNavigate()
 
   const [journalTitle, setJournalTitle] = useState('')
 
@@ -20,17 +19,6 @@ const LandingPage: React.FC = () => {
     queryKey: ['journals', 'recent'],
     queryFn: () => fetchRecentJournals(authToken)
   })
-
-  const handleStartJournaling = () => {
-    if (journalTitle.trim()) {
-      navigate({
-        to: '/journals/create',
-        search: { title: journalTitle }
-      })
-    } else {
-      navigate({ to: '/journals/create' })
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
@@ -47,12 +35,11 @@ const LandingPage: React.FC = () => {
             value={journalTitle}
             onChange={(e) => setJournalTitle(e.target.value)}
           />
-          <button
-            className="rounded bg-blue-500 px-6 py-3 text-white shadow hover:bg-blue-600"
-            onClick={handleStartJournaling}
-          >
-            Start Journaling Now
-          </button>
+          <Link to="/journals/create" search={{ title: journalTitle }}>
+            <button className="rounded bg-blue-500 px-6 py-3 text-white shadow hover:bg-blue-600">
+              Start Journaling Now
+            </button>
+          </Link>
         </div>
 
         <section className="mt-8">
