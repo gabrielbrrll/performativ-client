@@ -1,85 +1,55 @@
 import { Link } from '@tanstack/react-router'
-import React, { useCallback, useEffect, useState } from 'react'
-
-interface Journal {
-  id: number
-  title: string
-  content: string
-  status: 'draft' | 'published'
-}
+import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { fetchJournals } from 'api/queries/journals'
+import { useAuth } from 'context/AuthContext'
+import { TJournal } from 'pages/DashboardPage/DashboardPage'
 
 const JournalsPage: React.FC = () => {
-  const [journals, setJournals] = useState<Journal[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-
+  const { authToken } = useAuth()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortBy, setSortBy] = useState<string>('updated_at')
   const [sortDirection, setSortDirection] = useState<string>('desc')
-  const [selectedTag, setSelectedTag] = useState<string | null>(null) // For tag sorting
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  const fetchJournals = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-
-    const params = new URLSearchParams({
-      search: searchQuery
-    })
-
-    if (selectedTag) {
-      params.append('filter_tag', selectedTag) // Add tag to the query
-    } else {
-      params.append('sort_by', sortBy)
-      params.append('sort_direction', sortDirection)
-    }
-
-    try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/v1/journals?${params.toString()}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`
-          }
-        }
-      )
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to fetch journals')
-      }
-
-      const data = await response.json()
-      setJournals(data.data || data) // Adjust based on API structure
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }, [searchQuery, sortBy, sortDirection, selectedTag])
-
-  useEffect(() => {
-    fetchJournals()
-  }, [fetchJournals])
+  const {
+    data: journals,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['journals', { searchQuery, sortBy, sortDirection, selectedTag }],
+    queryFn: () =>
+      fetchJournals(authToken, {
+        searchQuery,
+        sortBy,
+        sortDirection,
+        selectedTag
+      })
+  })
 
   const handleSortByChange = (value: string) => {
     if (value === 'tags') {
       setSortBy('tags')
-      setSortDirection('') // Clear sort direction for tags
+      setSortDirection('')
       setSelectedTag(null) // Clear selected tag
     } else {
       setSortBy(value)
       setSortDirection('desc') // Default sort direction for created_at or updated_at
       setSelectedTag(null) // Clear tag sort if switching
     }
+    refetch()
   }
 
   const handleTagSort = (tag: string) => {
     setSelectedTag(tag)
     setSortBy('tags') // Indicate sorting by tags
     setSortDirection('') // Clear sort direction
+    refetch()
   }
+
+  console.log(journals, 'journals')
 
   return (
     <div className="p-8">
@@ -149,28 +119,38 @@ const JournalsPage: React.FC = () => {
       </div>
 
       {/* Loading State */}
-      {loading && <p>Loading journals...</p>}
+      {isLoading && <p>Loading journals...</p>}
 
       {/* Error State */}
-      {error && <p className="text-red-500">{error}</p>}
+      {isError && <p className="text-red-500">{String(error)}</p>}
 
       {/* Journals List */}
-      {!loading && !error && journals.length === 0 && (
+      {!isLoading && !isError && journals && journals.length === 0 && (
         <p>No journals found. Try adjusting your search or filters!</p>
       )}
 
-      {!loading && !error && journals.length > 0 && (
+      {!isLoading && !isError && journals && journals.length > 0 && (
         <ul className="space-y-4">
-          {journals.map((journal) => (
+          {journals.map((journal: TJournal) => (
             <li
               key={journal.id}
               className="rounded-lg border border-gray-300 p-4 shadow-sm"
             >
               <Link to="/journals/$id" params={{ id: `${journal.id}` }}>
                 <h2 className="text-lg font-bold">{journal.title}</h2>
-                <p className="text-sm text-gray-600">
-                  {journal.status === 'published' ? 'Published' : 'Draft'}
-                </p>
+                {/* Status Pill */}
+                <span
+                  className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                    journal.status === 'draft'
+                      ? 'bg-gray-200 text-gray-600'
+                      : journal.status === 'published'
+                        ? 'bg-green-200 text-green-600'
+                        : 'bg-yellow-200 text-yellow-600'
+                  }`}
+                >
+                  {journal.status.charAt(0).toUpperCase() +
+                    journal.status.slice(1)}
+                </span>
                 <p className="mt-2 text-gray-700">
                   {journal.content.length > 100
                     ? `${journal.content.slice(0, 100)}...`

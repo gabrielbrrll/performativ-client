@@ -1,40 +1,50 @@
-import { Link, redirect } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import React, { useState } from 'react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from 'context/AuthContext'
+import { useMutation } from '@tanstack/react-query'
+import { registerUser } from 'api/mutations/user'
 
 const SignUpPage: React.FC = () => {
+  const navigate = useNavigate()
+  const { setAuthToken, setUser } = useAuth()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const { setAuthToken } = useAuth()
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const mutation = useMutation<
+    {
+      token: string
+      user: { id: number; name: string; email: string; password: string }
+    },
+    Error,
+    { name: string; email: string; password: string }
+  >({
+    mutationFn: registerUser,
+    onSuccess: (data) => {
+      setAuthToken(data.token)
+      setUser(data.user)
+      setSuccess(true)
+
+      setTimeout(() => {
+        navigate({ to: '/dashboard' })
+      }, 500)
+    },
+    onError: (err: unknown) => {
+      if (err instanceof Error) {
+        setError(err.message || 'Something went wrong')
+      } else {
+        setError('An unexpected error occurred')
+      }
+    }
+  })
+
+  const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify({ name, email, password })
-      })
-
-      if (!response.ok) throw new Error('Failed to register')
-
-      const data = await response.json()
-
-      // Save auth token and redirect
-      setAuthToken(data.token)
-      setSuccess(true)
-      redirect({ to: '/dashboard' })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
-    }
+    mutation.mutate({ name, email, password })
   }
 
   return (

@@ -1,17 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { fetchRecentJournals } from '../../api/journals'
-import { useAuth } from '../../context/AuthContext'
+import { fetchRecentJournals } from 'api/queries/journals'
+import { useAuth } from 'context/AuthContext'
 
-const LandingPage: React.FC = () => {
+export type TJournal = {
+  id: string
+  content: string
+  title: string
+  status: 'published' | 'draft' | 'archived'
+}
+
+const DashboardPage: React.FC = () => {
   const { authToken, user } = useAuth()
 
   const [journalTitle, setJournalTitle] = useState('')
 
   const {
-    data: recentJournals,
+    data: recentJournals = [],
     isLoading,
     isError,
     error
@@ -50,20 +56,28 @@ const LandingPage: React.FC = () => {
             <div className="text-red-500">Error: {String(error)}</div>
           )}
 
-          {!isLoading && !isError && recentJournals && (
+          {!isLoading && !isError && recentJournals.length > 0 && (
             <ul className="space-y-4">
-              {recentJournals.map((journal: any) => (
+              {recentJournals.map((journal: TJournal) => (
                 <li
                   key={journal.id}
                   className="cursor-pointer rounded bg-white p-4 shadow hover:bg-gray-50"
                 >
-                  <h4 className="text-lg font-bold">{journal.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    {journal.content.slice(0, 50)}...
-                  </p>
+                  <Link to="/journals/$id" params={{ id: journal.id }}>
+                    <h4 className="text-lg font-bold">{journal.title}</h4>
+                    <p className="text-sm text-gray-600">
+                      {journal.content.slice(0, 50)}...
+                    </p>
+                  </Link>
                 </li>
               ))}
             </ul>
+          )}
+
+          {!isLoading && !isError && recentJournals.length === 0 && (
+            <div className="text-gray-600">
+              <p>You do not have any recent journals yet.</p>
+            </div>
           )}
         </section>
       </main>
@@ -71,4 +85,4 @@ const LandingPage: React.FC = () => {
   )
 }
 
-export default LandingPage
+export default DashboardPage

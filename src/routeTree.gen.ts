@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as LoginImport } from './routes/login'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedJournalsIndexImport } from './routes/_authenticated/journals/index'
@@ -23,7 +24,6 @@ import { Route as AuthenticatedJournalsIdImport } from './routes/_authenticated/
 // Create Virtual Routes
 
 const SignupLazyImport = createFileRoute('/signup')()
-const LoginLazyImport = createFileRoute('/login')()
 
 // Create/Update Routes
 
@@ -33,11 +33,11 @@ const SignupLazyRoute = SignupLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/signup.lazy').then((d) => d.Route))
 
-const LoginLazyRoute = LoginLazyImport.update({
+const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+} as any)
 
 const AuthenticatedRoute = AuthenticatedImport.update({
   id: '/_authenticated',
@@ -93,7 +93,7 @@ declare module '@tanstack/react-router' {
       id: '/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginLazyImport
+      preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
     '/signup': {
@@ -165,7 +165,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 
 export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteWithChildren
-  '/login': typeof LoginLazyRoute
+  '/login': typeof LoginRoute
   '/signup': typeof SignupLazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/journals/$id': typeof AuthenticatedJournalsIdRoute
@@ -175,7 +175,7 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
-  '/login': typeof LoginLazyRoute
+  '/login': typeof LoginRoute
   '/signup': typeof SignupLazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/journals/$id': typeof AuthenticatedJournalsIdRoute
@@ -187,7 +187,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/login': typeof LoginLazyRoute
+  '/login': typeof LoginRoute
   '/signup': typeof SignupLazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/journals/$id': typeof AuthenticatedJournalsIdRoute
@@ -231,13 +231,13 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  LoginLazyRoute: typeof LoginLazyRoute
+  LoginRoute: typeof LoginRoute
   SignupLazyRoute: typeof SignupLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  LoginLazyRoute: LoginLazyRoute,
+  LoginRoute: LoginRoute,
   SignupLazyRoute: SignupLazyRoute,
 }
 
@@ -267,7 +267,7 @@ export const routeTree = rootRoute
       ]
     },
     "/login": {
-      "filePath": "login.lazy.tsx"
+      "filePath": "login.tsx"
     },
     "/signup": {
       "filePath": "signup.lazy.tsx"

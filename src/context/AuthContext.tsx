@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (user) {
       localStorage.setItem('user', JSON.stringify(user))
     } else {
-      localStorage.removeItem('user') // Clear user from localStorage on logout
+      localStorage.removeItem('user')
     }
   }
 
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   useEffect(() => {
-    if (!authToken) {
+    if (authToken === null && localStorage.getItem('authToken') === null) {
       clearAuth()
     }
   }, [authToken])

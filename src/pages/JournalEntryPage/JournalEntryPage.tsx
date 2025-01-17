@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import Editor from 'components/Editor/Editor'
-import { useNavigate } from '@tanstack/react-router' // Use tanstack router for navigation
+import { useMutation } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { createJournalEntry } from 'api/mutations/journals'
 
 interface JournalEntryForm {
   title: string
@@ -10,58 +12,45 @@ interface JournalEntryForm {
 }
 
 const JournalEntryPage: React.FC = () => {
+  const { title } = useSearch({
+    from: '/_authenticated/journals/create'
+  })
+
   const navigate = useNavigate()
-  const { control, handleSubmit, register } = useForm<JournalEntryForm>({
+  const { control, handleSubmit, register, watch } = useForm<JournalEntryForm>({
     defaultValues: {
-      title: '',
+      title: title,
       content: '',
       status: 'draft'
     }
   })
 
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<boolean>(false)
 
-  const handleSave = async (data: JournalEntryForm, publish = false) => {
-    setError(null)
-    setSuccess(false)
-
-    const apiPath = 'http://127.0.0.1:8000/api/v1/journals'
-
-    try {
-      const response = await fetch(apiPath, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify({
-          ...data,
-          status: publish ? 'published' : 'draft'
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to save journal entry')
-      }
-
-      const responseData = await response.json()
-
-      setSuccess(true)
+  const mutation = useMutation({
+    mutationFn: createJournalEntry,
+    onSuccess: (data) => {
       navigate({
         to: '/journals/$id',
-        params: { id: responseData.journal.id.toString() }
+        params: { id: data.journal.id.toString() }
       })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+    },
+    onError: (err) => {
+      setError(err.message || 'An error occurred')
     }
+  })
+
+  const handleSave = (data: JournalEntryForm) => {
+    setError(null)
+    mutation.mutate(data)
   }
+
+  // Watch the status value from the form state
+  const status = watch('status')
 
   return (
     <div className="p-8">
-      <form onSubmit={handleSubmit((data) => handleSave(data, true))}>
+      <form onSubmit={handleSubmit(handleSave)}>
         <div className="mb-4">
           <label
             htmlFor="title"
@@ -78,15 +67,31 @@ const JournalEntryPage: React.FC = () => {
           />
         </div>
 
+        {/* Status Pill */}
+        <div className="mb-4">
+          <span
+            className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+              status === 'draft'
+                ? 'bg-gray-200 text-gray-600'
+                : status === 'published'
+                  ? 'bg-green-200 text-green-600'
+                  : 'bg-yellow-200 text-gray-400'
+            }`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}{' '}
+            {/* Capitalize status */}
+          </span>
+        </div>
+
         <div className="mb-4">
           <Controller
             name="content"
             control={control}
             render={({ field }) => (
               <Editor
-                value={field.value} // Bind the editor content to form value
+                value={field.value}
                 placeholder="Write your journal entry here..."
-                onChange={(content) => field.onChange(content)} // Update form state on every keystroke
+                onChange={field.onChange}
               />
             )}
           />
@@ -94,17 +99,12 @@ const JournalEntryPage: React.FC = () => {
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        {success && (
-          <p className="text-sm text-green-500">
-            Journal entry published successfully! Redirecting...
-          </p>
-        )}
-
         <button
           type="submit"
-          className="mt-4 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="mt-4 inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+          disabled={mutation.isPending}
         >
-          Save & Publish
+          {mutation.isPending ? 'Saving...' : 'Save & Publish'}
         </button>
       </form>
     </div>
