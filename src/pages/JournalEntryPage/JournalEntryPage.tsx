@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import Editor from 'components/Editor/Editor'
-import { Route } from 'routes/_authenticated/journals/create'
+import { useNavigate } from '@tanstack/react-router' // Use tanstack router for navigation
 
 interface JournalEntryForm {
   title: string
@@ -10,34 +10,27 @@ interface JournalEntryForm {
 }
 
 const JournalEntryPage: React.FC = () => {
-  const { title = '' } = Route.useSearch()
-
-  const { control, handleSubmit, register, setValue } =
-    useForm<JournalEntryForm>({
-      defaultValues: {
-        title: title,
-        content: '',
-        status: 'draft'
-      }
-    })
+  const navigate = useNavigate()
+  const { control, handleSubmit, register } = useForm<JournalEntryForm>({
+    defaultValues: {
+      title: '',
+      content: '',
+      status: 'draft'
+    }
+  })
 
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
-  const [status, setStatus] = useState<'draft' | 'published'>('draft')
-  const [journalId, setJournalId] = useState<number | null>(null)
 
   const handleSave = async (data: JournalEntryForm, publish = false) => {
     setError(null)
     setSuccess(false)
 
-    const apiPath = journalId
-      ? `http://127.0.0.1:8000/api/v1/journals/${journalId}`
-      : 'http://127.0.0.1:8000/api/v1/journals'
-    const method = journalId ? 'PUT' : 'POST'
+    const apiPath = 'http://127.0.0.1:8000/api/v1/journals'
 
     try {
       const response = await fetch(apiPath, {
-        method,
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
@@ -57,9 +50,10 @@ const JournalEntryPage: React.FC = () => {
       const responseData = await response.json()
 
       setSuccess(true)
-      setStatus(publish ? 'published' : 'draft')
-      setJournalId(responseData.journal.id)
-      setValue('status', publish ? 'published' : 'draft')
+      navigate({
+        to: '/journals/$id',
+        params: { id: responseData.journal.id.toString() }
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     }
@@ -67,19 +61,6 @@ const JournalEntryPage: React.FC = () => {
 
   return (
     <div className="p-8">
-      <h1 className="mb-4 text-2xl font-bold">Create a New Journal Entry</h1>
-
-      <div className="mb-4">
-        <span
-          className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-            status === 'published'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
-        >
-          {status === 'published' ? 'Published' : 'Draft'}
-        </span>
-      </div>
       <form onSubmit={handleSubmit((data) => handleSave(data, true))}>
         <div className="mb-4">
           <label
@@ -115,7 +96,7 @@ const JournalEntryPage: React.FC = () => {
 
         {success && (
           <p className="text-sm text-green-500">
-            Journal entry {journalId ? 'updated' : 'published'} successfully!
+            Journal entry published successfully! Redirecting...
           </p>
         )}
 
@@ -123,7 +104,7 @@ const JournalEntryPage: React.FC = () => {
           type="submit"
           className="mt-4 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          {journalId ? 'Update' : 'Save'} & Publish
+          Save & Publish
         </button>
       </form>
     </div>
