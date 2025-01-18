@@ -14,7 +14,9 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="flex items-center justify-between bg-white p-4 shadow-md">
-      <h1 className="text-2xl font-bold">Syrupy</h1>
+      <Link to="/dashboard">
+        <h1 className="text-2xl font-bold">Syrupy</h1>
+      </Link>
       {authToken ? (
         <div className="flex items-center">
           <span className="mr-4">Hi, {user ? user.name : 'Guest'}!</span>

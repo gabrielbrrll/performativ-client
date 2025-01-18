@@ -1,99 +1,95 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import React, { useState } from 'react'
-import { useAuth } from 'context/AuthContext'
+import React from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { useAuth } from 'context/AuthContext'
 import { registerUser } from 'api/mutations/user'
+import { useForm } from 'react-hook-form'
+import { SignUpFormData, signUpSchema } from 'utils/validations/users'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate()
   const { setAuthToken, setUser } = useAuth()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema)
+  })
 
-  const mutation = useMutation<
-    {
-      token: string
-      user: { id: number; name: string; email: string; password: string }
-    },
-    Error,
-    { name: string; email: string; password: string }
-  >({
+  const mutation = useMutation({
     mutationFn: registerUser,
     onSuccess: (data) => {
       setAuthToken(data.token)
       setUser(data.user)
-      setSuccess(true)
-
       setTimeout(() => {
         navigate({ to: '/dashboard' })
       }, 500)
     },
-    onError: (err: unknown) => {
-      if (err instanceof Error) {
-        setError(err.message || 'Something went wrong')
-      } else {
-        setError('An unexpected error occurred')
-      }
+    onError: (err) => {
+      alert(err.message || 'Something went wrong')
     }
   })
 
-  const handleSignUp = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    mutation.mutate({ name, email, password })
+  const onSubmit = (data: SignUpFormData) => {
+    mutation.mutate(data)
   }
 
   return (
     <div className="mx-auto max-w-md p-8">
-      <div className="flex items-center">
-        <h1 className="mb-4 text-2xl font-bold">Sign Up</h1>
-        <Link to="/login">
-          <h4>or login</h4>
-        </Link>
-      </div>
-      <form onSubmit={handleSignUp}>
+      <h1 className="mb-4 text-2xl font-bold">Sign Up</h1>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
-          <label className="block text-sm font-medium">Name</label>
+          <label>Name</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded border p-2"
-            required
+            {...register('name')}
+            className={`w-full rounded border p-2 ${
+              errors.name ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
+          {errors.name && (
+            <p className="text-sm text-red-500">{errors.name.message}</p>
+          )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium">Email</label>
+          <label>Email</label>
           <input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border p-2"
-            required
+            {...register('email')}
+            className={`w-full rounded border p-2 ${
+              errors.email ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium">Password</label>
+          <label>Password</label>
           <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border p-2"
-            required
+            {...register('password')}
+            className={`w-full rounded border p-2 ${
+              errors.password ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password.message}</p>
+          )}
         </div>
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        {success && (
-          <p className="text-sm text-green-500">Registration successful!</p>
-        )}
-        <button className="mt-4 w-full rounded bg-blue-500 py-2 text-white">
-          Sign Up
+        <button
+          className="mt-4 w-full rounded bg-blue-500 py-2 text-white"
+          disabled={isSubmitting || mutation.isPending}
+        >
+          {mutation.isPending ? 'Signing up...' : 'Sign Up'}
         </button>
       </form>
+      <Link to="/login" className="text-blue-500 hover:underline">
+        or login
+      </Link>
     </div>
   )
 }

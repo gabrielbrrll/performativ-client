@@ -9,6 +9,7 @@ export type TJournal = {
   content: string
   title: string
   status: 'published' | 'draft' | 'archived'
+  updated_at: Date
 }
 
 const DashboardPage: React.FC = () => {
