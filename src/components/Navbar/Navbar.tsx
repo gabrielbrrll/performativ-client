@@ -18,8 +18,11 @@ const Navbar: React.FC = () => {
         <h1 className="text-2xl font-bold">Syrupy</h1>
       </Link>
       {authToken ? (
-        <div className="flex items-center">
-          <span className="mr-4">Hi, {user ? user.name : 'Guest'}!</span>
+        <div className="flex items-center gap-4">
+          <button className="mr-4">Hi, {user ? user.name : 'Guest'}!</button>
+          <Link to="/dashboard">
+            <button>Dashboard</button>
+          </Link>
           <Link to="/journals">
             <button>Journals</button>
           </Link>

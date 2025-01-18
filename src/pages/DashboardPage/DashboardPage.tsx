@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { fetchRecentJournals } from 'api/queries/journals'
 import { useAuth } from 'context/AuthContext'
+import Moodboard from 'components/Moodboard/Moodboard'
 
 export type TJournal = {
   id: string
@@ -30,23 +31,30 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
       <main className="p-8">
-        <h2 className="mb-4 text-3xl">
-          Hi, {user ? user.name : 'Guest'}! How are you doing?
-        </h2>
+        <div className="my-10">
+          <h2 className="mb-4 text-3xl">
+            Hi, {user ? user.name : 'Guest'}! How are you doing?
+          </h2>
 
-        <div className="mb-6">
-          <input
-            type="text"
-            className="mr-4 rounded border px-4 py-2"
-            placeholder="Enter journal title (optional)"
-            value={journalTitle}
-            onChange={(e) => setJournalTitle(e.target.value)}
-          />
-          <Link to="/journals/create" search={{ title: journalTitle }}>
-            <button className="rounded bg-blue-500 px-6 py-3 text-white shadow hover:bg-blue-600">
-              Start Journaling Now
-            </button>
-          </Link>
+          <div className="mb-6">
+            <input
+              type="text"
+              className="mr-4 rounded border px-4 py-2"
+              placeholder="Enter journal title (optional)"
+              value={journalTitle}
+              onChange={(e) => setJournalTitle(e.target.value)}
+            />
+            <Link to="/journals/create" search={{ title: journalTitle }}>
+              <button className="rounded bg-blue-500 px-6 py-3 text-white shadow hover:bg-blue-600">
+                Start Journaling Now
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="my-12">
+          <h2 className="my-4 text-2xl text-gray-800">Moodboard</h2>
+          <Moodboard />
         </div>
 
         <section className="mt-8">
