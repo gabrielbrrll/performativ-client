@@ -11,7 +11,7 @@ const JournalsPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('updated_at')
   const [sortDirection, setSortDirection] = useState<string>('desc')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
-  const [groupByMonthYear, setGroupByMonthYear] = useState<boolean>(false) // New toggle state
+  const [groupByMonthYear, setGroupByMonthYear] = useState<boolean>(false)
 
   const {
     data: journals,
@@ -171,9 +171,7 @@ const JournalsPage: React.FC = () => {
                     className="rounded-lg border border-gray-300 p-4 shadow-sm"
                   >
                     <Link to="/journals/$id" params={{ id: `${journal.id}` }}>
-                      <h2 className="text-lg font-bold">
-                        {journal.title} dvcs
-                      </h2>
+                      <h2 className="text-lg font-bold">{journal.title}</h2>
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                           journal.status === 'draft'
