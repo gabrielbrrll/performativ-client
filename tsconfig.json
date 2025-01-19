@@ -23,11 +23,15 @@
       "node"
     ]
   },
-  "include": ["src"],
+  "include": ["src", "src/types"],
   "exclude": ["node_modules"],
   "paths": {
-    "api/*": ["api/*"],
-    "context/*": ["context/*"],
-    "components/*": ["components/*"]
+    "@/*": ["src/*"],
+    "api/*": ["src/api/*"],
+    "context/*": ["src/context/*"],
+    "components/*": ["src/components/*"],
+    "utils/*": ["src/utils/*"],
+    "pages/*": ["src/pages/*"],
+    "routes/*": ["src/routes/*"]
   }
 }

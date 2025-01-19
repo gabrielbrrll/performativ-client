@@ -53,7 +53,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         <div className="my-12">
-          <h2 className="my-4 text-2xl text-gray-800">Moodboard</h2>
+          <h2 className="my-12 text-2xl text-gray-800">Moodboard</h2>
           <Moodboard />
         </div>
 

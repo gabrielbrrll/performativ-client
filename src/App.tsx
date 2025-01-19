@@ -3,19 +3,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
 import type { FunctionComponent } from './common/types'
 import { AuthContextProps, useAuth } from 'context/AuthContext'
-import { routeTree } from 'routeTree.gen'
+import { routeTree } from './routeTree.gen'
 // import { TanStackRouterDevelopmentTools } from "./components/utils/development-tools/TanStackRouterDevelopmentTools";
 
-const router = createRouter({
+export const router = createRouter({
   routeTree,
   context: {
-    // Define the default context here if needed
-    authentication: {} as AuthContextProps // Use a placeholder or proper default value
+    authentication: {} as AuthContextProps
   }
 })
 declare module '@tanstack/react-router' {
   interface Register {
-    // This infers the type of our router and registers it across your entire project
     router: typeof router
   }
 }

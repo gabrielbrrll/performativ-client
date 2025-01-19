@@ -35,6 +35,7 @@ const JournalEntryPage: React.FC = () => {
         params: { id: data.journal.id.toString() }
       })
     },
+
     onError: (err) => {
       setError(err.message || 'An error occurred')
     }
@@ -79,7 +80,6 @@ const JournalEntryPage: React.FC = () => {
             }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}{' '}
-            {/* Capitalize status */}
           </span>
         </div>
 
