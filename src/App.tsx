@@ -1,30 +1,35 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { RouterProvider, type createRouter } from '@tanstack/react-router'
+import { createRouter, RouterProvider } from '@tanstack/react-router'
 import type { FunctionComponent } from './common/types'
-import { AuthProvider, useAuth } from 'context/AuthContext'
+import { AuthContextProps, useAuth } from 'context/AuthContext'
+import { routeTree } from 'routeTree.gen'
 // import { TanStackRouterDevelopmentTools } from "./components/utils/development-tools/TanStackRouterDevelopmentTools";
+
+const router = createRouter({
+  routeTree,
+  context: {
+    // Define the default context here if needed
+    authentication: {} as AuthContextProps // Use a placeholder or proper default value
+  }
+})
+declare module '@tanstack/react-router' {
+  interface Register {
+    // This infers the type of our router and registers it across your entire project
+    router: typeof router
+  }
+}
 
 const queryClient = new QueryClient()
 
-type AppProps = { router: ReturnType<typeof createRouter> }
-
-const App = ({ router }: AppProps): FunctionComponent => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <WithAuthContext router={router} />
-      </AuthProvider>
-    </QueryClientProvider>
-  )
-}
-
-const WithAuthContext: React.FC<{
-  router: ReturnType<typeof createRouter>
-}> = ({ router }) => {
+const App = (): FunctionComponent => {
   const auth = useAuth()
 
-  return <RouterProvider router={router} context={{ authentication: auth }} />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} context={{ authentication: auth }} />
+    </QueryClientProvider>
+  )
 }
 
 export default App

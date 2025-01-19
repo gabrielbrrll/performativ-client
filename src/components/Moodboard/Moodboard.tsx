@@ -75,7 +75,7 @@ const Moodboard: React.FC = () => {
   }
 
   return (
-    <div className="overflow-auto">
+    <div>
       <div className="relative">
         {/* Month Labels */}
         <div className="absolute -top-8 flex gap-0 text-sm font-medium text-gray-500">
