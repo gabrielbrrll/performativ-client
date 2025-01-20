@@ -1,5 +1,3 @@
-Here's the updated `README.md` to reflect your use of **pnpm**:
-
 ```markdown
 # Syrupy Client
 
@@ -12,8 +10,6 @@ The **Syrupy Client** is a web-based journaling application designed to help use
 - **Journal Management**: 
   - View, edit, and delete journal entries.
   - Filter entries by tags or moods.
-- **Responsive Design**: Optimized for both desktop and mobile devices.
-- **Testing Suite**: Includes unit and integration tests using **Vitest** and **Testing Library**.
 
 ## Technology Stack
 
