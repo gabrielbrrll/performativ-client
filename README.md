@@ -107,6 +107,3 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 - **João Paulo Moraes**  
   Email: [joaopaulomoraes@outlook.com](mailto:joaopaulomoraes@outlook.com)  
   GitHub: [joaopaulomoraes](https://github.com/joaopaulomoraes)
-```
-
-This version replaces `npm` commands with `pnpm`, ensuring it's aligned with your project's setup. Let me know if you need additional refinements!
