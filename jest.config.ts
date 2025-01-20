@@ -2,8 +2,23 @@
 const config = {
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-    '^.+\\.jsx?$': 'babel-jest' // Transform JS/JSX files using Babel
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        diagnostics: {
+          ignoreCodes: [1343]
+        },
+        astTransformers: {
+          before: [
+            {
+              path: 'node_modules/ts-jest-mock-import-meta',
+              options: { metaObjectReplacement: { url: 'https://www.url.com' } }
+            }
+          ]
+        }
+      }
+    ],
+    '^.+\\.jsx?$': 'babel-jest' // Transform JS/JSX files using Babel,
   },
   transformIgnorePatterns: [
     '/node_modules/(?!quill)' // Allow Jest to transform `quill`
