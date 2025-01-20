@@ -102,8 +102,15 @@ src/
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
-## Author
+## Boilerplat Author
 
 - **João Paulo Moraes**  
   Email: [joaopaulomoraes@outlook.com](mailto:joaopaulomoraes@outlook.com)  
   GitHub: [joaopaulomoraes](https://github.com/joaopaulomoraes)
+
+## Author
+
+- **Gabriel Ocampo**  
+  Email: [gabrielocampo.dev@gmail.com](mailto:gabrielocampo.dev@gmail.com)  
+  GitHub: [gabrielbrrll](https://github.com/gabrielbrrll)
+
