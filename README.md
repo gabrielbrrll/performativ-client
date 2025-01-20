@@ -1,4 +1,3 @@
-```markdown
 # Syrupy Client
 
 The **Syrupy Client** is a web-based journaling application designed to help users track their emotions and personal growth through journaling and mood analysis. This project is built using **React**, **TypeScript**, and **TailwindCSS**, with a focus on modern development practices and an intuitive user experience.
